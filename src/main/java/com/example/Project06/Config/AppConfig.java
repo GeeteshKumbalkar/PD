@@ -74,11 +74,10 @@ public class AppConfig {
         AuthenticationManager manager = builder.build();
 
         http
-                .cors().configurationSource(corsConfigurationSource())
-                .and()
-                .csrf().disable()
-                .formLogin().disable()
-                .authorizeHttpRequests()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf->csrf.disable())
+                .formLogin(formLogin->formLogin.disable())
+                .authorizeHttpRequests(auth->auth
                 .requestMatchers("/account/**").permitAll()
                 .requestMatchers("/JobFair/**").permitAll()
                 .requestMatchers("/jobFairQueAns/**").permitAll()
@@ -87,7 +86,6 @@ public class AppConfig {
                 .requestMatchers("/hr/**").permitAll()
                 .requestMatchers("/bootcampbookings/**").permitAll()
                 .requestMatchers("/mentorfeedback/**").permitAll()
-
                 .requestMatchers("/mentor/**").permitAll()
                 .requestMatchers("/plan/**").permitAll()
                 .requestMatchers("/LiveProject/**").permitAll()
@@ -115,13 +113,9 @@ public class AppConfig {
                 .requestMatchers("/mentorProgramBooking/**").permitAll()
                 .requestMatchers("/mentorschedule/**").permitAll()
                 .requestMatchers("/CareerPlanning/**").permitAll()
-
-                .anyRequest().authenticated()
-                .and()
+                .anyRequest().authenticated())
                 .authenticationManager(manager)
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling()
                 .authenticationEntryPoint(
                         ((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
