@@ -23,7 +23,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,18 +34,18 @@ public class AppConfig {
     @Autowired
     private CustomAuthenticationProvider customAuthenticationProvider;
 
-    @Autowired
-    JwtConfig jwtConfig;
-
 
     @Autowired
     private JwtService jwtService;
 
+    // Removed the @Autowired annotation from the JwtConfig field
+    private JwtConfig jwtConfig;
+
+    // Removed the @Bean annotation from the original jwtConfig() method
     @Bean
-    public JwtConfig jwtConfig(){
+    public JwtConfig jwtConfig() {
         return new JwtConfig();
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -74,10 +73,11 @@ public class AppConfig {
         AuthenticationManager manager = builder.build();
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf->csrf.disable())
-                .formLogin(formLogin->formLogin.disable())
-                .authorizeHttpRequests(auth->auth
+                .cors().configurationSource(corsConfigurationSource())
+                .and()
+                .csrf().disable()
+                .formLogin().disable()
+                .authorizeHttpRequests()
                 .requestMatchers("/account/**").permitAll()
                 .requestMatchers("/JobFair/**").permitAll()
                 .requestMatchers("/jobFairQueAns/**").permitAll()
@@ -86,6 +86,7 @@ public class AppConfig {
                 .requestMatchers("/hr/**").permitAll()
                 .requestMatchers("/bootcampbookings/**").permitAll()
                 .requestMatchers("/mentorfeedback/**").permitAll()
+
                 .requestMatchers("/mentor/**").permitAll()
                 .requestMatchers("/plan/**").permitAll()
                 .requestMatchers("/LiveProject/**").permitAll()
@@ -113,18 +114,23 @@ public class AppConfig {
                 .requestMatchers("/mentorProgramBooking/**").permitAll()
                 .requestMatchers("/mentorschedule/**").permitAll()
                 .requestMatchers("/CareerPlanning/**").permitAll()
-                .anyRequest().authenticated())
+
+                .anyRequest().authenticated()
+                .and()
                 .authenticationManager(manager)
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(
                         ((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
                 .accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
-                .addFilterBefore(new JwtUsernamePasswordAuthenticationFilter(manager, jwtConfig, jwtService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new JwtTokenAuthenticationFilter(jwtConfig, jwtService), UsernamePasswordAuthenticationFilter.class)
-        ;
+                // Used the modified jwtConfig() method without parameters
+                .addFilterBefore(new JwtUsernamePasswordAuthenticationFilter(manager, jwtConfig(), jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenAuthenticationFilter(jwtConfig(), jwtService), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
     @Bean
