@@ -139,7 +139,7 @@ public class AppConfig {
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(Collections.singletonList("https://preferable.co.in"));
-                config.setAllowedOrigins(Collections.singletonList("http://localhost:5400"));
+                config.setAllowedOrigins(Collections.singletonList("http://localhost:5173/"));
 
                 config.setAllowedMethods(Collections.singletonList("*"));
                 config.setAllowCredentials(true);
